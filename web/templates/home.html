@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet"  type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movies SSE</title>
+</head>
+<body class="main">
+    <h1 class="header">Find Your Movie</h1>
+    <form action="" method="POST" class="form">
+        <input class="full-width search-bar" type="text" id="plot" name="plot" for="plot" value="{{ plot }}">
+        <!-- filters -->
+        <table class="filters full-width">
+            <!-- headers -->
+            <tr>
+                <td>Genre</td>
+                <td>Nb Movies</td>
+                <td>From</td>
+                <td>To</td>
+            </tr>
+            <tr>
+                <td class="filter-cell">
+                    <select name="genre" id="genre" for="genre" class="form-field">
+                    {% for genre in genre_list %}
+                        <option value="{{ genre }}">{{ genre }}</option>
+                    {% endfor %}
+                    </select>
+                </td>
+                <td class="filter-cell"><input class="form-field" type="number" min="0" max="20" step="1" value="10" for="k" id="k" name="k" /></td>
+                <td class="filter-cell"><input class="form-field" type="number" min="1900" max="2099" step="1" value="1980" for="start-release-year" id="start-release-year" name="start-release-year" /></td>
+                <td class="filter-cell"><input class="form-field" type="number" min="1900" max="2099" step="1" value="1990" for="end-release-year" id="end-release-year" name="end-release-year" /></td>
+            </tr>
+        </table>
+        <input class='full-width submit-btn' type="submit" value="submit" onclick="loading()" id="submit">
+    </form>
+    {% if search_time %}
+        <h3>Query time: {{ search_time }} seconds</h3>
+    {% endif %}
+    {% if results %}
+        <table class="results">
+            <tr class="results-header">
+                <td>Title</td>
+                <td>Release Year</td>
+                <td>Genre</td>
+            </tr>
+            {% for movie in results %}
+                <tr>
+                    <td>{{ movie['Title'] }}</td>
+                    <td>{{ movie['year'] }}</td>
+                    <td>{{ movie['genre'] }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+</body>
+
+</html>
