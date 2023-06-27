@@ -1,4 +1,3 @@
-from keras.models import load_model
 from sentence_transformers import SentenceTransformer, util
 class Model():
     """
@@ -9,7 +8,6 @@ class Model():
     def __init__(self, name: str) -> None:
         self.name = name
         self.model = SentenceTransformer(name)
-    
 
     def similarity(self, plot: str, corpus: list):
         plot_embedding = self.model.encode(plot, convert_to_tensor=True)
