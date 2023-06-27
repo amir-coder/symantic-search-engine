@@ -1,1 +1,5 @@
 data/*
+sse_venv
+
+
+__pycache__/

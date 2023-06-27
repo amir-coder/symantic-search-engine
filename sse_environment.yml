@@ -1,0 +1,4 @@
+name: sse_env
+channels:
+  - defaults
+prefix: D:\installed\Anaconda\envs\sse_env
