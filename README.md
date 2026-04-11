@@ -54,7 +54,7 @@ In this step, we created a module in our project named models, this module is re
 # Building the platform
 Inorder to test our model innteractively, I build a simple web server using flask with simple interface that enables the user to try diffrent search scenarios, see the Query time (search time) of the model and visualize the results.  
 The platform looks like this:
-![Open platform UI on ./ui.png](./ui.png)
+![Open platform UI on ./ui.png](./docs/images/ui.png)
 
 
 # Running the tests
