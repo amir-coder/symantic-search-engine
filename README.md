@@ -11,7 +11,6 @@ In this file, I will design the approche of takling this problem of making a sea
  7. Running the tests
  8. Checking project requirements
  9. Writing documentation
- 10. Submitting the project
 
 
 
@@ -62,11 +61,8 @@ The platform looks like this:
 This Step involved running the tests we made at the start of our project inroder to validate our see module, our see module passed all 6 test scenarios successfully
 
 # Checking project requirements
-Our project in the current form respects the requirements given in the readme.md file, it takes in consideration the plot, diffrent filters and output a list of movies from the database in an interactive way
+Our project in the current form respects the requirements.It takes in consideration the plot, diffrent filters and output a list of movies from the database in an interactive way
 
 
  # Writing documentation
  In the conception of our project we made each module in seperate folder resulting in an intuitive project strucutre, also each block of code is commented, tests and important functions are documented.
-
-# Submitting the project
-In the email, it's mentioned that the deadline for submitting the project is for Saturday 17/06/2023 at 23:59. The working branch is feature/amir/sse, it contains the projects code including the tests and the notebook and will be pushed to the remote repository after a final verification. 
