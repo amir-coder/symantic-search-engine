@@ -1,48 +1,42 @@
-from flask import Flask
-from flask import render_template, redirect, request
+from flask import Flask, render_template, request, jsonify
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src')))
+
 import time
-from sse import SSE
+from src.engine import SearchEngine
 
 
 app = Flask(__name__)
-sse = SSE(database_filename='wiki_movie_plots_deduped.csv')
 
-@app.route('/', methods=['GET', 'POST'])
+print("Starting Flask server...")
+engine = SearchEngine(
+    datapath='wiki_movie_plots_deduped.csv', 
+    embdedings_path='plot_embeddings.npy'
+)
 
-def home():
-    #genres we take into consideration in the platform
-    genres = ['western','comedy', 'short', 'short film', 'biographical', 'drama', 'adventure', 'short fantasy', 'sports', 'horror','crime']
-    if request.method == 'GET':
-        return render_template('home.html', genre_list=genres,
-                                stat='start', plot = '')
-    elif request.method == 'POST':
-        print(request.form.get('plot'))
-        #start timer
-        start = time.perf_counter()
-        #creating the filter
-        filter = {
-            'plot': request.form.get('plot'),
-            'genre': request.form.get('genre'),
-            'k': int(request.form.get('k')),
-            'start-release-year': int(request.form.get('start-release-year')),
-            'end-release-year': int(request.form.get('end-release-year')),
-        }
-        print(filter)
-        #search
-        results = sse.search(filter=filter)
-        #end timer
-        end = time.perf_counter()
-        search_time = round(end - start, 4)
-        print('results:')
-        print(results)
-        return render_template(
-            'home.html', 
-            genre_list=genres, 
-            stat='done', 
-            results=results, 
-            search_time = search_time,
-            plot=request.form.get('plot')
-        )
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route("/api/search", methods=['POST'])
+def search_api():
+    try:
+        data = request.json
+        start_time = time.time()
+        results =   engine.search(filters=data, k=10)
+        query_time = time.time() - start_time
+
+        return jsonify({   
+            "status": "success", 
+            "results": results, 
+            "count": len(results),
+            "query_time": round(query_time, 4)
+        })
+    except Exception as e:
+        print(f"Error during search: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)
