@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, jsonify
 import sys
 import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 import time
 from src.engine import SearchEngine
@@ -11,8 +11,8 @@ app = Flask(__name__)
 
 print("Starting Flask server...")
 engine = SearchEngine(
-    datapath='wiki_movie_plots_deduped.csv', 
-    embdedings_path='plot_embeddings.npy'
+    datapath='data/preprocessed/clean_dataset.csv', 
+    embdedings_path='data/preprocessed/plot_embeddings.npy'
 )
 
 @app.route('/')
@@ -24,7 +24,7 @@ def search_api():
     try:
         data = request.json
         start_time = time.time()
-        results =   engine.search(filters=data, k=10)
+        results =   engine.search(filters=data)
         query_time = time.time() - start_time
 
         return jsonify({   

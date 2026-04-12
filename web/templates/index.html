@@ -3,21 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Find Your Movie</title>
+    <title>Find Your Movie | Semantic Search</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; background-color: #fafafa; }
-        .container { max-width: 800px; margin: auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        h1 { font-size: 2.5em; margin-bottom: 30px; }
-        input[type="text"] { width: 100%; padding: 12px; font-size: 1.2em; border: 2px solid #ccc; border-radius: 20px; box-sizing: border-box; margin-bottom: 20px;}
-        .filters { display: flex; justify-content: space-between; margin-bottom: 20px; text-align: left;}
+        body { font-family: Arial, sans-serif; text-align: center; margin-top: 40px; background-color: #fafafa; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 30px 40px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        
+        /* Header, Description, and GitHub Button */
+        h1 { font-size: 2.5em; margin-bottom: 10px; color: #222; }
+        .description { font-size: 1.1em; color: #555; margin-bottom: 15px; line-height: 1.5; }
+        .github-btn {
+            display: inline-block; margin-bottom: 30px; padding: 8px 16px;
+            background-color: #24292e; color: white; text-decoration: none;
+            border-radius: 6px; font-weight: bold; font-size: 0.95em;
+            transition: background-color 0.2s ease;
+        }
+        .github-btn:hover { background-color: #0366d6; }
+        .github-btn svg { width: 16px; height: 16px; vertical-align: text-bottom; margin-right: 5px; fill: currentColor; }
+
+        /* Form Elements */
+        input[type="text"] { width: 100%; padding: 15px; font-size: 1.1em; border: 2px solid #ddd; border-radius: 8px; box-sizing: border-box; margin-bottom: 25px; transition: border-color 0.2s;}
+        input[type="text"]:focus { border-color: #8cc63f; outline: none; }
+        
+        .filters { display: flex; justify-content: space-between; margin-bottom: 25px; text-align: left;}
         .filter-group { display: flex; flex-direction: column; width: 22%; }
-        .filter-group input, .filter-group select { padding: 8px; border: 1px solid #ccc; }
-        button { width: 100%; padding: 15px; background-color: #8cc63f; color: black; font-weight: bold; border: 2px solid black; border-radius: 20px; cursor: pointer; font-size: 1.2em; margin-bottom: 20px;}
-        button:hover { background-color: #7ab32f; }
-        #query-time { font-size: 1.2em; font-weight: bold; margin-bottom: 20px; }
-        table { width: 100%; border-collapse: collapse; text-align: left; }
-        th { background-color: #69ffb4; padding: 10px; border-bottom: 2px solid #333; }
-        td { padding: 10px; border-bottom: 1px solid #eee; }
+        .filter-group label { font-size: 0.9em; font-weight: bold; color: #444; margin-bottom: 5px;}
+        .filter-group input, .filter-group select { padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 1em; }
+        
+        button.submit-btn { width: 100%; padding: 15px; background-color: #8cc63f; color: #111; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; font-size: 1.2em; margin-bottom: 20px; transition: background-color 0.2s;}
+        button.submit-btn:hover { background-color: #7ab32f; }
+        
+        #query-time { font-size: 1.1em; font-weight: bold; margin-bottom: 20px; color: #333; }
+        
+        /* Table Styles */
+        table { width: 100%; border-collapse: collapse; text-align: left; margin-top: 10px; }
+        th { background-color: #69ffb4; padding: 12px; border-bottom: 2px solid #222; color: #111; }
+        td { padding: 15px 12px; border-bottom: 1px solid #eee; vertical-align: top; }
+        
+        /* Expandable Plot Styles */
+        .plot-row { display: none; background-color: #f8fbff; }
+        .plot-content { padding: 10px 10px 20px 10px; font-style: italic; color: #444; font-size: 0.95em; line-height: 1.6; }
+        .expand-btn { 
+            background: none; border: none; color: #007bff; font-size: 0.8em; 
+            cursor: pointer; margin-left: 10px; padding: 5px; border-radius: 50%;
+        }
+        .expand-btn:hover { background-color: #e2e6ea; }
+
+        /* Badge Styles */
+        .badge { padding: 6px 12px; border-radius: 12px; font-weight: bold; font-size: 0.85em; color: white; display: inline-block; text-align: center; min-width: 90px; }
+        .badge-high { background-color: #28a745; } /* Green */
+        .badge-medium { background-color: #ffc107; color: #333; } /* Yellow */
+        .badge-low { background-color: #6c757d; } /* Grey */
     </style>
 </head>
 <body>
@@ -25,7 +60,16 @@
 <div class="container">
     <h1>Find Your Movie</h1>
     
-    <input type="text" id="plot" placeholder="Describe the movie you are looking for...">
+    <p class="description">
+        An AI-powered semantic search engine. Describe a movie plot, and the Natural Language Processing model will find the closest matches using deep learning embeddings.
+    </p>
+    
+    <a href="https://github.com/amir-coder/symantic-search-engine" target="_blank" rel="noopener noreferrer" class="github-btn">
+        <svg viewBox="0 0 16 16" version="1.1" aria-hidden="true"><path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg>
+        Star on GitHub
+    </a>
+    
+    <input type="text" id="plot" placeholder="e.g., A space crew encounters a terrifying alien...">
     
     <div class="filters">
         <div class="filter-group">
@@ -43,16 +87,16 @@
             <input type="number" id="k" value="10" min="1" max="100">
         </div>
         <div class="filter-group">
-            <label>From</label>
+            <label>From Year</label>
             <input type="number" id="start_year" value="1980">
         </div>
         <div class="filter-group">
-            <label>To</label>
-            <input type="number" id="end_year" value="1990">
+            <label>To Year</label>
+            <input type="number" id="end_year" value="2000">
         </div>
     </div>
 
-    <button onclick="performSearch()">submit</button>
+    <button class="submit-btn" onclick="performSearch()">Search</button>
 
     <div id="query-time"></div>
 
@@ -62,7 +106,7 @@
                 <th>Title</th>
                 <th>Release Year</th>
                 <th>Genre</th>
-                <th>Score</th>
+                <th>Match Score</th>
             </tr>
         </thead>
         <tbody id="results-body">
@@ -71,8 +115,41 @@
 </div>
 
 <script>
+    // Heuristic function to convert the BERT dot product to a human-readable scale
+    function formatScore(rawScore) {
+        if (!rawScore) return '<span class="badge badge-low">N/A</span>';
+        
+        let percentage = Math.round(((rawScore - 120) / 50) * 100);
+        percentage = Math.max(0, Math.min(100, percentage)); 
+
+        let badgeClass = 'badge-low';
+        let label = 'Fair';
+        
+        if (percentage >= 75) {
+            badgeClass = 'badge-high';
+            label = 'Excellent';
+        } else if (percentage >= 45) {
+            badgeClass = 'badge-medium';
+            label = 'Good';
+        }
+
+        return `<span class="badge ${badgeClass}" title="Raw Dot Product: ${rawScore}">${label} (${percentage}%)</span>`;
+    }
+
+    function togglePlot(index) {
+        const plotRow = document.getElementById(`plot-row-${index}`);
+        const btn = document.getElementById(`toggle-btn-${index}`);
+        
+        if (plotRow.style.display === 'none' || plotRow.style.display === '') {
+            plotRow.style.display = 'table-row';
+            btn.innerText = '▲';
+        } else {
+            plotRow.style.display = 'none';
+            btn.innerText = '▼';
+        }
+    }
+
     async function performSearch() {
-        // 1. Gather data from UI
         const payload = {
             plot: document.getElementById('plot').value,
             genre: document.getElementById('genre').value,
@@ -85,7 +162,6 @@
         document.getElementById('results-table').style.display = 'none';
 
         try {
-            // 2. Call the Flask API
             const response = await fetch('/api/search', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -95,20 +171,38 @@
             const data = await response.json();
 
             if (data.status === "success") {
-                // 3. Update the UI with results
                 document.getElementById('query-time').innerText = `Query time: ${data.query_time} seconds`;
                 
                 const tbody = document.getElementById('results-body');
-                tbody.innerHTML = ''; // Clear old results
+                tbody.innerHTML = ''; 
                 
-                data.results.forEach(movie => {
-                    const row = `<tr>
-                        <td>${movie.Title}</td>
-                        <td>${movie.year}</td>
-                        <td>${movie.genre}</td>
-                        <td>${movie.Score ? movie.Score : 'N/A'}</td>
+                data.results.forEach((movie, index) => {
+                    const title = movie.Title || 'Unknown';
+                    const year = movie['Release Year'] || movie.year || movie.Release_Year || 'N/A';
+                    const genre = movie.Genre || movie.genre || 'N/A';
+                    
+                    // Look for Plot or plot in the JSON response from Python
+                    const plotText = movie.Plot || movie.plot || "Plot description not available in dataset.";
+                    
+                    const scoreHtml = movie.Score ? formatScore(movie.Score) : '<span class="badge badge-low">N/A</span>';
+
+                    const mainRow = `<tr>
+                        <td style="font-weight: bold;">
+                            ${title}
+                            <button id="toggle-btn-${index}" class="expand-btn" onclick="togglePlot(${index})" title="Show Plot">▼</button>
+                        </td>
+                        <td>${year}</td>
+                        <td style="text-transform: capitalize;">${genre}</td>
+                        <td>${scoreHtml}</td>
                     </tr>`;
-                    tbody.innerHTML += row;
+                    
+                    const plotRow = `<tr id="plot-row-${index}" class="plot-row">
+                        <td colspan="4">
+                            <div class="plot-content"><strong>Plot:</strong> ${plotText}</div>
+                        </td>
+                    </tr>`;
+
+                    tbody.innerHTML += mainRow + plotRow;
                 });
                 
                 document.getElementById('results-table').style.display = 'table';

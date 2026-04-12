@@ -49,7 +49,7 @@ class SearchEngine:
             mask &= self.df['Release Year'] <= filters['end_release_year']
         
         if 'genre' in filters and filters['genre'].lower() != 'all':
-            mask &= self.df['Genre'] == filters['genre']
+            mask &= self.df['Genre'].str.lower() == filters['genre'].lower()
         
         filtered_df = self.df[mask]
 
@@ -60,7 +60,7 @@ class SearchEngine:
         plot_query = filters.get('plot', '').strip()
 
         if not plot_query:
-            return self.__format_results(filtered_df.head(k))
+            return self._format_results(filtered_df.head(k))
         
         # vector search
 
@@ -77,9 +77,9 @@ class SearchEngine:
 
         ranked_df = ranked_df.sort_values(by='Score', ascending=False)
 
-        return self.__format_results(ranked_df.head(k))
+        return self._format_results(ranked_df.head(k))
 
-    def __format_results(self, df: pd.DataFrame):
+    def _format_results(self, df: pd.DataFrame):
         """"Helper method to format the search results into a list of dicts for the API."""
         results = []
         for _, row in df.iterrows():
@@ -87,7 +87,8 @@ class SearchEngine:
             movie_data = {
                 'Title': row['Title'],
                 'Genre': row['Genre'],
-                'Release Year': row['Release Year']
+                'Release_Year': row['Release Year'],
+                'Plot': row['Plot'],
             }
 
             if "Score" in row:
