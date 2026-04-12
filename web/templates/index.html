@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Your Movie</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; background-color: #fafafa; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h1 { font-size: 2.5em; margin-bottom: 30px; }
+        input[type="text"] { width: 100%; padding: 12px; font-size: 1.2em; border: 2px solid #ccc; border-radius: 20px; box-sizing: border-box; margin-bottom: 20px;}
+        .filters { display: flex; justify-content: space-between; margin-bottom: 20px; text-align: left;}
+        .filter-group { display: flex; flex-direction: column; width: 22%; }
+        .filter-group input, .filter-group select { padding: 8px; border: 1px solid #ccc; }
+        button { width: 100%; padding: 15px; background-color: #8cc63f; color: black; font-weight: bold; border: 2px solid black; border-radius: 20px; cursor: pointer; font-size: 1.2em; margin-bottom: 20px;}
+        button:hover { background-color: #7ab32f; }
+        #query-time { font-size: 1.2em; font-weight: bold; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th { background-color: #69ffb4; padding: 10px; border-bottom: 2px solid #333; }
+        td { padding: 10px; border-bottom: 1px solid #eee; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Find Your Movie</h1>
+    
+    <input type="text" id="plot" placeholder="Describe the movie you are looking for...">
+    
+    <div class="filters">
+        <div class="filter-group">
+            <label>Genre</label>
+            <select id="genre">
+                <option value="all">All</option>
+                <option value="comedy">Comedy</option>
+                <option value="action">Action</option>
+                <option value="drama">Drama</option>
+                <option value="sci-fi">Sci-Fi</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>Nb Movies</label>
+            <input type="number" id="k" value="10" min="1" max="100">
+        </div>
+        <div class="filter-group">
+            <label>From</label>
+            <input type="number" id="start_year" value="1980">
+        </div>
+        <div class="filter-group">
+            <label>To</label>
+            <input type="number" id="end_year" value="1990">
+        </div>
+    </div>
+
+    <button onclick="performSearch()">submit</button>
+
+    <div id="query-time"></div>
+
+    <table id="results-table" style="display: none;">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Release Year</th>
+                <th>Genre</th>
+                <th>Score</th>
+            </tr>
+        </thead>
+        <tbody id="results-body">
+        </tbody>
+    </table>
+</div>
+
+<script>
+    async function performSearch() {
+        // 1. Gather data from UI
+        const payload = {
+            plot: document.getElementById('plot').value,
+            genre: document.getElementById('genre').value,
+            k: parseInt(document.getElementById('k').value),
+            start_release_year: parseInt(document.getElementById('start_year').value),
+            end_release_year: parseInt(document.getElementById('end_year').value)
+        };
+
+        document.getElementById('query-time').innerText = "Searching...";
+        document.getElementById('results-table').style.display = 'none';
+
+        try {
+            // 2. Call the Flask API
+            const response = await fetch('/api/search', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+
+            if (data.status === "success") {
+                // 3. Update the UI with results
+                document.getElementById('query-time').innerText = `Query time: ${data.query_time} seconds`;
+                
+                const tbody = document.getElementById('results-body');
+                tbody.innerHTML = ''; // Clear old results
+                
+                data.results.forEach(movie => {
+                    const row = `<tr>
+                        <td>${movie.Title}</td>
+                        <td>${movie.year}</td>
+                        <td>${movie.genre}</td>
+                        <td>${movie.Score ? movie.Score : 'N/A'}</td>
+                    </tr>`;
+                    tbody.innerHTML += row;
+                });
+                
+                document.getElementById('results-table').style.display = 'table';
+            } else {
+                document.getElementById('query-time').innerText = `Error: ${data.message}`;
+            }
+
+        } catch (error) {
+            document.getElementById('query-time').innerText = "Failed to connect to server.";
+        }
+    }
+</script>
+
+</body>
+</html>
