@@ -28,7 +28,7 @@ So the pipline entries will be start_release_year and end_release_year. Also I w
 
 The model pipline will take in consideration the diffrent filters of the semantic search engine: 
 
-
+![Open archi model ./docs/images/architecture.drawio.png](./docs/images/architecture.drawio.png)
 # Writing unit tests
 
 Unit tests will verify diffent senarios of filters inputs on the resulting model, the diffent senarios will include:
