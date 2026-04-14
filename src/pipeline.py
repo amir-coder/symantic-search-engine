@@ -5,6 +5,25 @@ import time
 
 from sentence_transformers import SentenceTransformer, util
 
+def map_main_genre(text):
+    text = str(text)
+    
+    # Priority mapping (order matters! e.g., "sci-fi comedy" becomes "sci-fi")
+    if 'sci' in text or 'fiction' in text: return 'sci-fi'
+    if 'action' in text: return 'action'
+    if 'comedy' in text or 'humor' in text: return 'comedy'
+    if 'romance' in text or 'romantic' in text: return 'romance'
+    if 'horror' in text: return 'horror'
+    if 'thriller' in text: return 'thriller'
+    if 'drama' in text: return 'drama'
+    if 'war' in text: return 'war'
+    if 'mystery' in text: return 'mystery'
+    if 'crime' in text: return 'crime'
+    if 'animation' in text or 'animated' in text or 'anime' in text: return 'animation'
+    if 'documentary' in text: return 'documentary'
+    
+    return 'other' # Catch-all for "unknown" or highly obscure genres
+
 def run_pipline(raw_data_path: str, preprocessed_data_path: str, embeddings_path: str):
     #setup
     print("Lounching the pipline")
@@ -27,6 +46,11 @@ def run_pipline(raw_data_path: str, preprocessed_data_path: str, embeddings_path
 
     print(f"Initial nb rows: {initial_shape[0]}, Nb rows after cleaning: {clean_dataset.shape[0]}")
 
+    print(f"Normalizing genres...")
+    clean_dataset['Genre'] = clean_dataset['Genre'].apply(map_main_genre)
+
+    print(f"Normalized genres. Sample genres: {clean_dataset['Genre'].unique()[:10]}")
+    
     # Embeddings / ML
     model_name = "sentence-transformers/msmarco-bert-base-dot-v5"
     print(f"Loading model: {model_name}")
