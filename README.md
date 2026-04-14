@@ -1,68 +1,87 @@
-# Movies Search Engine Project
+# Semantic Movie Search Engine
 
-In this file, I will design the approche of takling this problem of making a search engine with filters from a movies dataset. The steps involved in the process are:
+An AI-powered search application that uses Natural Language Processing (NLP) to find movies based on plot descriptions, rather than just exact keyword matches.
 
- 1. Extracting the requirements of the project
- 2. Designing the model's pipline
- 3. Writing unit tests
- 4. ML part: model building
- 5. Model Integration
- 6. Building the platform
- 7. Running the tests
- 8. Checking project requirements
- 9. Writing documentation
+**Goal:** The primary objective of this project was to practice integrating a large language model (LLM) into a full-stack web application. It served as a hands-on learning test for **System Design**, focusing heavily on optimizing Machine Learning inference pipelines for speed and scalability.
 
+## 🖥️ User Interface
 
+Users can search using a combination of semantic text (understanding the *meaning* of the prompt) and hard metadata filters (Year and Genre). The engine maps the mathematical similarity of the query to the dataset and returns a Match Score.
 
-# Project Requirements
+![Semantic Search UI](docs/images/ui.png)
 
-Implement a semantic search engine for movies using pretrained [BERT](https://arxiv.org/pdf/1810.04805.pdf) or [Sentence-BERT](https://arxiv.org/pdf/1908.10084.pdf) for text representation. The desired pipeline should be able to retrieve the top K movies, given the following inputs:
+## ⚙️ System Architecture & Optimization
 
--   K :int (number of movies to suggest, sorted by search score)
--   Plot :str (description of the plot)
--   Genre :str (Optional argument but must be included in the search function)
--   Release year : int
-In my implementation of the semantic search engine, I will modify the release year input to an interval, imagine if someone don't know the movie name and only knows that's it's from the 80s. 
-So the pipline entries will be start_release_year and end_release_year. Also I will add the release year in the piplines output.
-# Making the platform architecture
+Initially, the system calculated embeddings on-the-fly. If a user filtered down to 5,000 movies, the application would force the BERT model to process 5,000 text descriptions at runtime. This resulted in execution times exceeding **30 minutes per query**.
 
-The model pipline will take in consideration the diffrent filters of the semantic search engine: 
+Drawing inspiration from Business Intelligence ETL (Extract, Transform, Load) pipelines, I completely refactored the architecture to separate the heavy data processing from the serving layer:
 
-![Open archi model ./docs/images/architecture.drawio.png](./docs/images/architecture.drawio.png)
-# Writing unit tests
+![System Architecture](docs/images/architecture.drawio.png)
 
-Unit tests will verify diffent senarios of filters inputs on the resulting model, the diffent senarios will include:
+### The Solution: Vector Precomputation
 
- - **test_release_year_order**: the model should be not break if the user entered a wrong release year order (start_release_year > end_release_year)
- -  **Entering empty plot**: the pipline should work in case we give an empty plot or indicate error message
- - **Entering empty Genre**: the pipline should work in case we give an empty Genre or indicate error message
- - **Entering empty k value**: the pipline should work in case we give an empty value of k or indicate error message
- - **Entering negative k value**: the pipline should work in case we give an negative value of k or indicate error message
- - **Entering known plot**: in case we enter the same plot recorded in the dataset for a specific movie M1, the highest matching movie in the output of the model should be M1 (in case the filters are all accurate).
+1. **Offline ETL (GPU Accelerated):** I moved the text embedding process to a dedicated script (`src/pipeline.py`) running on a Google Colab GPU. This script passes the entire dataset's plot descriptions through the `sentence-transformers/msmarco-bert-base-dot-v5` model and saves the resulting mathematical vectors as a highly optimized `.npy` file.
 
- # ML part: model building
-In a notebook, we will choose and test diffrent models with our Dataset: 
-##**Model 1:** msmarco-bert-base-dot-v5 from Sentence Bert
-In the paper [Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks](https://arxiv.org/pdf/1908.10084.pdf) Nils Reimers and Iryna Gurevych presented Sentence-BERT a modification of BERT pretrained models adpated to derive semantic meaning of sentences.Sentence-BERT is suitable for our task for it's computation time advantage. As a first step I used msmarco-bert-base-dot-v5 model, and tested it's results of a specific movie.
-##**Model 2:** Going a step further with Domain Adaptation using Generative Pseudo-Labeling
-In the second model, after making a proof of concept model, integrating the model in our project and validating all designed unittest. We will use the gpl from the sbert documentation to adapt our movies semantic search model. Unfortunately performing this task requires alot of computation power and it broke several times when attepting to train it on google colab GPU, the code for performing gpl is in the Notebook.
+2. **Instant Inference:** The Flask web server loads this precomputed NumPy array into RAM at boot.
 
-# Model Integration
-In this step, we created a module in our project named models, this module is responsive for loading and using sentence-bert models
+3. **Optimized Search:** When a user searches, the app only passes the *user's short query* through the model (taking ~50ms). It then uses PyTorch's highly optimized C++ backend to perform a matrix dot-product against the precomputed database.
 
+**Impact:** Execution time dropped from **>30 minutes** to **< 1 second** on a local machine without a GPU, successfully transitioning the system from compute-bound $O(N)$ to near $O(1)$ lookup speeds.
 
-# Building the platform
-Inorder to test our model innteractively, I build a simple web server using flask with simple interface that enables the user to try diffrent search scenarios, see the Query time (search time) of the model and visualize the results.  
-The platform looks like this:
-![Open platform UI on ./ui.png](./docs/images/ui.png)
+## 🚀 Setup Instructions
 
+Follow these steps to run the application on your local machine.
 
-# Running the tests
-This Step involved running the tests we made at the start of our project inroder to validate our see module, our see module passed all 6 test scenarios successfully
+### 1. Create the Environment
 
-# Checking project requirements
-Our project in the current form respects the requirements.It takes in consideration the plot, diffrent filters and output a list of movies from the database in an interactive way
+It is highly recommended to use an isolated environment. Make sure you have Anaconda or Miniconda installed.
 
+```bash
+# Create a fresh conda environment with Python 3.10
+conda create -n sse_env python=3.10 -y
 
- # Writing documentation
- In the conception of our project we made each module in seperate folder resulting in an intuitive project strucutre, also each block of code is commented, tests and important functions are documented.
+# Activate the environment
+conda activate sse_env
+
+# Install all required dependencies
+pip install -r requirements.txt
+```
+
+### 2. Download Precomputed Data Assets
+
+Due to GitHub's file size limits, the precomputed embeddings and cleaned datasets are hosted externally.
+
+1. Download the data assets from this Google Drive folder: **[[Google Drive Link](https://drive.google.com/drive/folders/1gf-kT0pPjzO9D3MBoT-xkXLTCRJuMoIK?usp=drive_link)]**
+2. Ensure you have downloaded both `clean_dataset.csv` and `plot_embeddings.npy`.
+3. Place both files inside the `data/preprocessed/` directory at the root of this project.
+
+Your folder structure should look like this:
+```text
+amir-almamma/
+├── data/
+│   └── preprocessed/
+│       ├── clean_dataset.csv
+│       └── plot_embeddings.npy
+├── src/
+...
+```
+
+### 3. Run the Unit Tests
+
+The project includes a suite of Pytest unit tests to ensure the data filtering and machine learning vector math execute correctly.
+
+```bash
+# Run tests from the project root
+pytest tests/
+```
+
+### 4. Launch the Web App
+
+Once the data is in place and tests pass, you can start the server.
+
+```bash
+# Start the Flask serving layer
+python web/app.py
+```
+
+Open your browser and navigate to `http://127.0.0.1:5000` to start searching!
